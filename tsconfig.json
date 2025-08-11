@@ -1,0 +1,17 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  }, 
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+, "app/(cart)/images/https:/t3.ftcdn.net/jpg/02/99/16/54/360_F_299165427_ohNPXktPy0CdgTVgw9Jr5HDdChdKLBI0.jpg"  ]
+}
