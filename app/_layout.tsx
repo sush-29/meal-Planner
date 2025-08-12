@@ -4,10 +4,9 @@ import { useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-// Read Clerk key from .env (make sure .env is saved in project root)
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
-// ✅ Only use SecureStore on native (Android/iOS). Web doesn't support it.
+// Use SecureStore only on native; web doesn't support it.
 const tokenCache =
   Platform.OS === 'web'
     ? undefined
@@ -22,13 +21,11 @@ const tokenCache =
         async saveToken(key: string, value: string) {
           try {
             await SecureStore.setItemAsync(key, value);
-          } catch {
-            return;
-          }
+          } catch {}
         },
       };
 
-const InitialLayout = () => {
+function InitialLayout() {
   const { isLoaded, isSignedIn } = useAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -37,27 +34,23 @@ const InitialLayout = () => {
     if (!isLoaded) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inPublicGroup = segments[0] === '(public)';
 
-    if (!isSignedIn) {
-      router.replace('/login');
-      return;
+    if (isSignedIn) {
+      // If logged in and not already in the auth group, send to app home
+      if (!inAuthGroup) router.replace('/home');
+    } else {
+      // If logged out and not already on a public page, send to login
+      if (!inPublicGroup) router.replace('/login');
     }
-
-    if (isSignedIn && !inAuthGroup) {
-      // Change '/(auth)/home' to '/home' if that's your actual route
-      router.replace('/(auth)/home');
-    }
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, segments]);
 
   return <Slot />;
-};
+}
 
 export default function RootLayout() {
   return (
-    <ClerkProvider
-      publishableKey={CLERK_PUBLISHABLE_KEY}
-      tokenCache={tokenCache as any}
-    >
+    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} tokenCache={tokenCache as any}>
       <InitialLayout />
     </ClerkProvider>
   );
