@@ -1,9 +1,12 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
-import type { Product, CartItem } from "../../types/types";
+// app/(auth)/CartContext.tsx
+import React, { createContext, useContext, useMemo, useState } from 'react';
+import type { Product, CartItem } from '../../types/types';
+
+type ProductWithImage = Product & { image: number };
 
 type CartContextValue = {
   cart: CartItem[];
-  addToCart: (p: Product) => void;
+  addToCart: (p: ProductWithImage) => void;
   decrement: (id: string) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
@@ -13,26 +16,38 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
+function toCartItem(p: ProductWithImage): CartItem {
+  return {
+    id: p.id,
+    name: p.name,
+    price: p.price,
+    image: p.image,          // ✅ include image to satisfy CartItem
+    quantity: 1,
+  };
+}
+
 export const CartProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  const addToCart = (p: Product) => {
+  const addToCart = (p: ProductWithImage) => {
     setCart(prev => {
       const existing = prev.find(ci => ci.id === p.id);
       if (existing) {
         return prev.map(ci =>
-          ci.id === p.id ? { ...ci, quantity: ci.quantity + 1 } : ci
+          ci.id === p.id ? { ...ci, quantity: (ci.quantity ?? 0) + 1 } : ci
         );
       }
-      return [...prev, { ...p, quantity: 1 }];
+      return [...prev, toCartItem(p)];
     });
   };
 
   const decrement = (id: string) => {
     setCart(prev =>
       prev
-        .map(ci => (ci.id === id ? { ...ci, quantity: ci.quantity - 1 } : ci))
-        .filter(ci => ci.quantity > 0)
+        .map(ci =>
+          ci.id === id ? { ...ci, quantity: (ci.quantity ?? 0) - 1 } : ci
+        )
+        .filter(ci => (ci.quantity ?? 0) > 0)
     );
   };
 
@@ -43,12 +58,12 @@ export const CartProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const clearCart = () => setCart([]);
 
   const count = useMemo(
-    () => cart.reduce((n, ci) => n + ci.quantity, 0),
+    () => cart.reduce((n, ci) => n + (ci.quantity ?? 0), 0),
     [cart]
   );
 
   const subtotal = useMemo(
-    () => cart.reduce((sum, ci) => sum + ci.price * ci.quantity, 0),
+    () => cart.reduce((sum, ci) => sum + ci.price * (ci.quantity ?? 0), 0),
     [cart]
   );
 
@@ -62,6 +77,6 @@ export const CartProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
 export const useCart = () => {
   const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used within CartProvider");
+  if (!ctx) throw new Error('useCart must be used within CartProvider');
   return ctx;
 };
