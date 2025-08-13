@@ -1,26 +1,20 @@
-// types.ts
+// types/types.ts
+import { ImageSourcePropType } from 'react-native';
 
-export interface Product {
-    id: string;
-    name: string;
-    ingredients?: string;
-    price: number;
-
-
-  }
-  
-  // export interface CartItem extends Product {
-  //   quantity: number;
-  // }
-  export interface Meal {
-    id: string;
-    name: string;
-    items: Product[];
-  }
-  // types.ts
-export interface CartItem {
+export type Product = {
   id: string;
   name: string;
+  ingredients?: string;
   price: number;
-  quantity?: number; // Optional, as it will be added when the item is in the cart
-}
+  image: any;   // <-- required by home.tsx
+};
+
+export type Meal = {
+  id: string;
+  name: string;
+  items: Product[];
+};
+
+export interface CartItem extends Product {
+  quantity: number;     // required in cart
+};

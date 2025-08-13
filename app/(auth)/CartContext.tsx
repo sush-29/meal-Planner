@@ -1,73 +1,67 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { CartItem } from '../../types/types'; // Adjust the import based on your project structure
+import React, { createContext, useContext, useMemo, useState } from "react";
+import type { Product, CartItem } from "../../types/types";
 
-interface CartContextType {
-  cartItems: CartItem[];
-  addToCart: (item: CartItem) => void;
-
-  removeFromCart: (itemId: string) => void;
+type CartContextValue = {
+  cart: CartItem[];
+  addToCart: (p: Product) => void;
+  decrement: (id: string) => void;
+  removeFromCart: (id: string) => void;
   clearCart: () => void;
-  totalAmount: number;
-}
+  count: number;
+  subtotal: number;
+};
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+const CartContext = createContext<CartContextValue | null>(null);
 
-export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+export const CartProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const [cart, setCart] = useState<CartItem[]>([]);
 
-  const addToCart = (item: CartItem) => {
-    setCartItems((prevCart) => {
-      const existingItem = prevCart.find((cartItem) => cartItem.id === item.id);
-      if (existingItem) {
-        return prevCart.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
+  const addToCart = (p: Product) => {
+    setCart(prev => {
+      const existing = prev.find(ci => ci.id === p.id);
+      if (existing) {
+        return prev.map(ci =>
+          ci.id === p.id ? { ...ci, quantity: ci.quantity + 1 } : ci
         );
       }
-      return [...prevCart, { ...item, quantity: 1 }];
+      return [...prev, { ...p, quantity: 1 }];
     });
   };
 
-  
-
-
-
-
-
-  
-
-  const removeFromCart = (itemId: string) => {
-    setCartItems((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === itemId);
-      if (existingItem && existingItem.quantity > 1) {
-        return prevCart.map((item) =>
-          item.id === itemId
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        );
-      }
-      return prevCart.filter((item) => item.id !== itemId);
-    });
+  const decrement = (id: string) => {
+    setCart(prev =>
+      prev
+        .map(ci => (ci.id === id ? { ...ci, quantity: ci.quantity - 1 } : ci))
+        .filter(ci => ci.quantity > 0)
+    );
   };
 
-  const clearCart = () => {
-    setCartItems([]);
+  const removeFromCart = (id: string) => {
+    setCart(prev => prev.filter(ci => ci.id !== id));
   };
 
-  const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  const clearCart = () => setCart([]);
 
-  return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart, totalAmount }}>
-      {children}
-    </CartContext.Provider>
+  const count = useMemo(
+    () => cart.reduce((n, ci) => n + ci.quantity, 0),
+    [cart]
   );
+
+  const subtotal = useMemo(
+    () => cart.reduce((sum, ci) => sum + ci.price * ci.quantity, 0),
+    [cart]
+  );
+
+  const value = useMemo(
+    () => ({ cart, addToCart, decrement, removeFromCart, clearCart, count, subtotal }),
+    [cart, count, subtotal]
+  );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCart = () => {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-  return context;
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error("useCart must be used within CartProvider");
+  return ctx;
 };
