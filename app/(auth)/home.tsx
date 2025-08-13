@@ -411,7 +411,7 @@ import {
 } from 'react-native';
 import { Product } from '../../types/types';
 import { useCart } from './CartContext';
-import { IMAGES } from '@/app/(cart)/images'; // <= or '../(cart)/images'
+import { IMAGES } from '@/app/(cart)/cart'; // <= or '../(cart)/images'
 
 interface MealPlan {
   id: string;
