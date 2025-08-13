@@ -1,11 +1,7 @@
-import { ActivityIndicator, View } from 'react-native';
+// app/index.tsx
+import { Redirect } from 'expo-router';
 
-const StartPage = () => {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center' }}>
-      <ActivityIndicator size="large" color="#0000ff" />
-    </View>
-  );
-};
-
-export default StartPage;
+export default function Index() {
+  // redirect the root (/) to the login page
+  return <Redirect href="/login" />;
+}
