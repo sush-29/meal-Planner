@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { Link, useRouter } from 'expo-router';
+import { IS_DEMO } from '../../config/demo';
 
-// ✅ initialize firebase app by importing your config (no alias)
+// Initialize Firebase (your existing config file)
 import '../../config/firebaseConfig';
 
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
@@ -12,18 +13,23 @@ export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const onLogin = async () => {
-    const auth = getAuth();
     try {
+      setSubmitting(true);
+      const auth = getAuth();
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      // go to the authenticated tabs
-      router.replace('/(auth)/home');
+      router.replace('/home'); // no route-group names in URL
     } catch (e: any) {
       console.log('login error', e);
-      Alert.alert('Sign in failed', e?.message ?? 'Check your credentials and try again.');
+      Alert.alert('Sign in failed', e?.message ?? 'Try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  const continueAsGuest = () => router.replace('/home');
 
   return (
     <View style={styles.container}>
@@ -46,10 +52,17 @@ export default function Login() {
         style={styles.input}
       />
 
-      <Button title="Sign in" onPress={onLogin} />
+      <Button title={submitting ? 'Signing in…' : 'Sign in'} onPress={onLogin} disabled={submitting} />
 
       <View style={{ height: 12 }} />
-      <Link href="/(public)/reset">Forgot password?</Link>
+      <Link href="/reset">Forgot password?</Link>
+
+      {IS_DEMO && (
+        <>
+          <View style={{ height: 16 }} />
+          <Button title="Continue as Guest" onPress={continueAsGuest} />
+        </>
+      )}
     </View>
   );
 }

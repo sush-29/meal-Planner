@@ -4,6 +4,30 @@ import { View, Text, Button, Alert } from 'react-native';
 import { useCart } from './CartContext';
 import { db } from '../../config/firebaseConfig';
 import { collection, addDoc } from 'firebase/firestore';
+import { IS_DEMO } from '../../config/demo';
+
+const handleCheckout = async () => {
+  if (IS_DEMO) {
+    Alert.alert('Success!', 'Order placed (demo). No backend calls.');
+    clearCart();
+    return;
+  }
+
+  // your real Firestore flow:
+  try {
+    const orderRef = await addDoc(collection(db, 'orders'), {
+      items: cartItems,
+      totalAmount,
+      createdAt: new Date(),
+    });
+    Alert.alert('Success!', 'Your order has been placed successfully!', [
+      { text: 'OK', onPress: () => clearCart() },
+    ]);
+  } catch (e) {
+    console.error('Error placing order', e);
+    Alert.alert('Checkout failed', 'Please try again.');
+  }
+};
 
 const Cart = () => {
   const { cart, removeFromCart, clearCart, subtotal } = useCart();
