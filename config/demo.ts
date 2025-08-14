@@ -1,2 +1,3 @@
 // config/demo.ts
-export const IS_DEMO = process.env.EXPO_PUBLIC_DEMO === 'true';
+// EXPO_PUBLIC_DEMO defaults to false if not set
+export const IS_DEMO = (process.env.EXPO_PUBLIC_DEMO ?? 'false') === 'true';
