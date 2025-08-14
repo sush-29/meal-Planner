@@ -1,5 +1,11 @@
 {
+  "buildCommand": "npx expo export --platform web",
+  "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "header", "key": "accept", "value": "text/html" }],
+      "destination": "/"
+    }
   ]
 }
