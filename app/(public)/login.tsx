@@ -3,11 +3,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { IS_DEMO } from '../../config/demo';
-
-// Initialize Firebase (your existing config file)
-import '../../config/firebaseConfig';
-
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../config/firebaseConfig';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function Login() {
   const router = useRouter();
@@ -18,9 +15,8 @@ export default function Login() {
   const onLogin = async () => {
     try {
       setSubmitting(true);
-      const auth = getAuth();
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      router.replace('/home'); // no route-group names in URL
+      router.replace('/home');
     } catch (e: any) {
       console.log('login error', e);
       Alert.alert('Sign in failed', e?.message ?? 'Try again.');
@@ -52,10 +48,16 @@ export default function Login() {
         style={styles.input}
       />
 
-      <Button title={submitting ? 'Signing in…' : 'Sign in'} onPress={onLogin} disabled={submitting} />
+      <Button
+        title={submitting ? 'Signing in…' : 'Sign in'}
+        onPress={onLogin}
+        disabled={submitting}
+      />
 
       <View style={{ height: 12 }} />
       <Link href="/reset">Forgot password?</Link>
+      <View style={{ height: 12 }} />
+      <Link href="/register">Create an account</Link>
 
       {IS_DEMO && (
         <>
