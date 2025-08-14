@@ -1,7 +1,8 @@
 // app/(public)/reset.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../config/firebaseConfig';
 
 export default function ResetPassword() {
   const [email, setEmail] = useState('');
@@ -12,7 +13,6 @@ export default function ResetPassword() {
       return;
     }
     try {
-      const auth = getAuth();
       await sendPasswordResetEmail(auth, email.trim());
       Alert.alert('Check your inbox', 'Password reset link sent.');
     } catch (e: any) {
