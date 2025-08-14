@@ -1,7 +1,7 @@
 // app/(public)/login.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { Link, useRouter } from 'expo-router';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Pressable, Platform } from 'react-native';
+import { useRouter } from 'expo-router';
 import { IS_DEMO } from '../../config/demo';
 import { auth } from '../../config/firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -55,9 +55,13 @@ export default function Login() {
       />
 
       <View style={{ height: 12 }} />
-      <Link href="/reset">Forgot password?</Link>
+      <Pressable onPress={() => router.push('/reset')}>
+        <Text style={styles.link}>Forgot password?</Text>
+      </Pressable>
       <View style={{ height: 12 }} />
-      <Link href="/register">Create an account</Link>
+      <Pressable onPress={() => router.push('/register')}>
+        <Text style={styles.link}>Create an account</Text>
+      </Pressable>
 
       {IS_DEMO && (
         <>
@@ -80,5 +84,9 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 12,
     backgroundColor: '#fff',
+  },
+  link: {
+    color: '#0a84ff',
+    ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
   },
 });
